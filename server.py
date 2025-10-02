@@ -28,3 +28,13 @@ def similar_chart(symbol: str):
         return JSONResponse({"symbol": symbol, "data": data})
     except Exception as e:
         raise HTTPException(500, f"SimilarChart error: {e}")
+import asyncio
+
+@app.on_event("startup")
+async def _prewarm():
+    async def _lazy():
+        try:
+            get_fq()  # load module, KHÔNG gọi tác vụ nặng
+        except Exception as e:
+            print("Prewarm failed:", e, flush=True)
+    asyncio.create_task(_lazy())
