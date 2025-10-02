@@ -1,49 +1,30 @@
-
-import os
-from fastapi import FastAPI, HTTPException, Header
+# server.py
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
-import uvicorn
-import FiinQuantX as fq
 
-APP_API_KEY = os.environ.get("APP_API_KEY")
-FIIN_USER = os.environ.get("FIIN_USER")
-FIIN_PASS = os.environ.get("FIIN_PASS")
+app = FastAPI()
 
-if not APP_API_KEY or not FIIN_USER or not FIIN_PASS:
-    raise RuntimeError("Missing required environment variables: APP_API_KEY, FIIN_USER, FIIN_PASS")
-
-app = FastAPI(title="FiinQuant Mini Gateway", version="1.0.0")
-
-# Login once when server starts
-client = fq.FiinSession(username=FIIN_USER, password=FIIN_PASS).login()
-
-def check_key(x_api_key: str | None):
-    if (APP_API_KEY and (not x_api_key or x_api_key != APP_API_KEY)):
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
-
+# Healthcheck siêu nhẹ cho Render
 @app.get("/health")
 def health():
-    return {"ok": True}
+    return {"status": "ok"}
 
-@app.get("/history")
-def history(symbol: str, period: int = 30, x_api_key: str | None = Header(default=None)):
-    """
-    Get daily history for a symbol (last N sessions).
-    Use request header: x-api-key: <APP_API_KEY>
-    Example: /history?symbol=HPG&period=30
-    """
-    check_key(x_api_key)
+# Biến toàn cục để lưu module sau khi import
+_fq = None
+def get_fq():
+    global _fq
+    if _fq is None:
+        import importlib
+        _fq = importlib.import_module("FiinQuantX")  # <- import tại đây
+    return _fq
+
+# Ví dụ 1 endpoint dùng FiinQuantX
+@app.get("/similar-chart")
+def similar_chart(symbol: str):
+    fq = get_fq()
     try:
-        df = client.Fetch_Trading_Data(
-            realtime=False,
-            tickers=[symbol.upper()],
-            fields=['open','high','low','close','volume'],
-            by='1d',
-            period=period
-        ).get_data()
-        return JSONResponse(content=df.to_dict(orient="records"))
+        # gọi hàm của FiinQuantX như bình thường
+        data = fq.SimilarChart(symbol)  # ví dụ minh họa
+        return JSONResponse({"symbol": symbol, "data": data})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-if __name__ == "__main__":
-    uvicorn.run("server:app", host="0.0.0.0", port=int(os.environ.get("PORT", "8000")), reload=False)
+        raise HTTPException(500, f"SimilarChart error: {e}")
