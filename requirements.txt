@@ -10,7 +10,6 @@ requests>=2.32
 typing-extensions>=4.12
 
 # Cách 1: cài từ GitHub (minh họa – thay repo thật của bạn)
-git+https://github.com/fiinlab/fiinquantx.git
 
 # Hoặc Cách 2 (nếu FiinQuantX phát hành qua simple index riêng):
 # --extra-index-url https://fiinquant.github.io/fiinquantx/simple
