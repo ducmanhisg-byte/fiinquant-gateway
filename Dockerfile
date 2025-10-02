@@ -1,25 +1,37 @@
+# Python gọn nhẹ
 FROM python:3.11-slim
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+
+# Tăng tốc & gọn pip cache
+ENV PIP_NO_CACHE_DIR=1
+
+# Thư mục làm việc
 WORKDIR /app
 
+# Cài công cụ build + git (cần để pip clone repo private)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git build-essential gcc g++ \
+    build-essential \
+    git \
  && rm -rf /var/lib/apt/lists/*
 
+# Cài Python deps trước để tận dụng cache
 COPY requirements.txt .
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Cài các gói KHÔNG bao gồm dòng git của FiinQuantX trong requirements.txt
-# (Hãy xóa dòng git đó khỏi requirements.txt, chỉ giữ các lib khác: fastapi, uvicorn, plotly, stumpy, v.v.)
-RUN pip install -r requirements.txt
-
-# Cài FiinQuantX từ GitHub private bằng token build-time
+# --- CÀI FiinQuantX (PRIVATE) BẰNG TOKEN) ---
+# Render sẽ cung cấp biến môi trường trong lúc build, ta map sang ARG rồi dùng
 ARG GITHUB_TOKEN
-# Render sẽ đưa env vào build-time; để chắc ăn, ta tham chiếu cả ENV lẫn ARG
 ENV GITHUB_TOKEN=${GITHUB_TOKEN}
-RUN test -n "$GITHUB_TOKEN" && \
-    pip install "git+https://${GITHUB_TOKEN}@github.com/fiinlab/fiinquantx.git@main#egg=FiinQuantX"
 
+# Fail sớm nếu thiếu token; sau đó cài từ private repo
+RUN test -n "$GITHUB_TOKEN" \
+ && pip install "git+https://${GITHUB_TOKEN}@github.com/fiinlab/fiinquantx.git@main#egg=FiinQuantX"
+
+# Copy toàn bộ code app
 COPY . .
+
+# Cổng chuẩn cho Render
 ENV PORT=10000
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "${PORT}"]
+EXPOSE 10000
+
+# Chạy app
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "10000"]
