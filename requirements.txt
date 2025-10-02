@@ -1,8 +1,6 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
---extra-index-url https://fiinquant.github.io/fiinquantx/simple
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
---extra-index-url https://fiinquant.github.io/fiinquantx/simple
-fiinquantx
+numpy==1.26.4
+pandas==2.2.2
 fastdtw
+fiinquantx
