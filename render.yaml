@@ -1,11 +1,11 @@
 services:
   - type: web
     name: fiinquant-api
-    runtime: docker
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: false
+    healthCheckPath: /health
     envVars:
-      - key: APP_API_KEY
-        sync: false
-      - key: FIIN_USER
-        sync: false
-      - key: FIIN_PASS
-        sync: false
+      - key: API_KEY
+        value: MyFiin-Key_2025_x3W9pQ
