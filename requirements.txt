@@ -1,18 +1,10 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
-
-# Các phụ thuộc hay gặp của FiinQuantX (tuỳ phiên bản)
-numpy>=1.26
-pandas>=2.2
-scipy>=1.13
-numba>=0.59
-requests>=2.32
-typing-extensions>=4.12
-
-# Cách 1: cài từ GitHub (minh họa – thay repo thật của bạn)
-
-# Hoặc Cách 2 (nếu FiinQuantX phát hành qua simple index riêng):
-# --extra-index-url https://fiinquant.github.io/fiinquantx/simple
-# FiinQuantX==<phiên_bản_phù_hợp>
-plotly>=5
-stumpy>=1.12
+pydantic==2.9.2
+requests==2.32.3
+numpy==1.26.4
+pandas==2.2.2
+plotly==5.24.1
+stumpy==1.12.0
+scipy==1.11.4
+numba==0.58.1
